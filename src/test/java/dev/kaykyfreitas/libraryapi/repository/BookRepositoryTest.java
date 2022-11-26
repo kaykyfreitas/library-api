@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-public class BookRepositoryTest {
+class BookRepositoryTest {
 
     @Autowired
     TestEntityManager testEntityManager;
@@ -25,23 +25,63 @@ public class BookRepositoryTest {
 
     @Test
     @DisplayName("Should be able to return true when exists a book whit the ISBN provided")
-    public void returnTrueWhenIsbnExists() {
-        String isbn = "1234567";
-        Book book = Book.builder().author("John Doe").title("The book").isbn(isbn).build();
+    void returnTrueWhenIsbnExists() {
+        var book = createNewBook();
         testEntityManager.persist(book);
 
-        boolean exists = bookRepository.existsByIsbn(isbn);
+        var exists = bookRepository.existsByIsbn(book.getIsbn());
 
         assertThat(exists).isTrue();
     }
 
     @Test
     @DisplayName("Should be able to return false when does not exists a book whit the ISBN provided")
-    public void returnFalseWhenIsbnDoesNotExists() {
-        String isbn = "1234567";
+    void returnFalseWhenIsbnDoesNotExists() {
+        var isbn = "1234567";
 
-        boolean exists = bookRepository.existsByIsbn(isbn);
+        var exists = bookRepository.existsByIsbn(isbn);
 
         assertThat(exists).isFalse();
     }
+
+    @Test
+    @DisplayName("Should be able to get a book by id")
+    void findById() {
+        var book = createNewBook();
+        testEntityManager.persist(book);
+
+        var foundBook = bookRepository.findById(book.getId());
+
+        assertThat(foundBook).isPresent();
+    }
+
+    @Test
+    @DisplayName("Should be able to save a book")
+    void saveBook() {
+        var book = createNewBook();
+
+        var savedBook = bookRepository.save(book);
+
+        assertThat(book.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should be able to delete a book")
+    void deleteBook() {
+        var book = createNewBook();
+        testEntityManager.persist(book);
+
+        var foundBook = testEntityManager.find(Book.class, book.getId());
+
+        bookRepository.delete(foundBook);
+
+        var deletedBook = testEntityManager.find(Book.class, book.getId());
+
+        assertThat(deletedBook).isNull();
+    }
+
+    private static Book createNewBook() {
+        return Book.builder().author("John Doe").title("The book").isbn("1234567").build();
+    }
+
 }

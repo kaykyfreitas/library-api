@@ -17,10 +17,10 @@ public class ApiErrors {
 
     public ApiErrors(BusinessException e) {
         this.errors = Arrays.asList(e.getMessage());
-
     }
 
     public List<String> getErrors() {
         return errors;
     }
+
 }
